@@ -4,7 +4,6 @@ import java.util.List;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -54,6 +53,7 @@ public class GrassSurface extends SurfaceView {
             throw new ClassCastException(context.toString()
                     + " must implement OnTouchListener");
         }
+		invalidate();
 	}
 	
 	@Override
@@ -89,8 +89,10 @@ public class GrassSurface extends SurfaceView {
 	}
 	
 	public void update(List<Dandelion> dandelions) {
+		if (drawing_bitmap == null) {
+			return;
+		}
 		drawing_bitmap.eraseColor(Color.TRANSPARENT);
-		Log.v(TAG, "update: list length = " +dandelions.size());
 		for (Dandelion d : dandelions) {
 			drawing_canvas.drawBitmap(d.getBitmap(), d.getX(), d.getY(), paint);
 		}

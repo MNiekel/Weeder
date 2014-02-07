@@ -6,19 +6,24 @@ import android.graphics.BitmapFactory;
 
 public class Dandelions {
 		
-	private static Bitmap bitmap;
+	private static Bitmap flower;
+	private static Bitmap empty;
 	
 	public static void setBitmap(Context c, int r) {
-		bitmap = BitmapFactory.decodeResource(c.getResources(), R.drawable.dandelion_flower_32x32);
+		flower = BitmapFactory.decodeResource(c.getResources(), R.drawable.dandelion_flower_32x32);
+		empty = BitmapFactory.decodeResource(c.getResources(), R.drawable.dandelion_empty_32x32);
 	}
 	
 	public static Bitmap getBitmap(int state) {
 		switch (state) {
-			case 0:
+			case Dandelion.STATE_GROW:
 				//flower
-				return bitmap;
+				return empty;
+			case Dandelion.STATE_FLOWER:
+				//blowing flower
+				return flower;
 			default:
-				return null;
+				return flower;
 		}
 	}
 

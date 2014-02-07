@@ -1,5 +1,6 @@
 package net.niekel.weeder;
 
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
@@ -11,12 +12,13 @@ public class Graphics {
 	private Canvas canvas;
 	private Context context;
 
-	public Graphics(Context context) {
-	    this.context = context;
+	public Graphics(Context c) {
+	    context = c;
 	}
 	
-	public void setFrameBuffer(View v) {
-		frameBuffer = Bitmap.createBitmap(v.getWidth(), v.getHeight(), Config.ARGB_8888);
+	public void setFrameBuffer() {
+		View screen = ((Activity) context).findViewById(R.id.screen);
+		frameBuffer = Bitmap.createBitmap(screen.getWidth(), screen.getHeight(), Config.ARGB_8888);
 	    canvas = new Canvas(frameBuffer);
 	}
 

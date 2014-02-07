@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.app.Activity;
-import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Handler;
@@ -18,9 +17,6 @@ public class GameActivity extends Activity implements GrassSurface.OnTouchListen
 	private final int desiredFrameRate = 60;
 	
 	private Handler handler = new Handler();
-
-	private long startTime;
-	private long lastTime;
 
 	private GrassSurface surface;
 	private List<Dandelion> dandelions = new ArrayList<Dandelion>();
@@ -49,30 +45,46 @@ public class GameActivity extends Activity implements GrassSurface.OnTouchListen
 		super.onPause();
 		Log.i(TAG, "onPause()");
 		handler.removeCallbacks(updateScreen);
+		handler.removeCallbacks(addDandelion);
+		for (Dandelion d : dandelions) {
+			handler.removeCallbacks(d);
+		}
+		dandelions.clear();
 	}
 	
 	@Override
 	public void onResume() {
 		super.onResume();
 		Log.i(TAG, "onResume()");
-		lastTime = System.currentTimeMillis();
 		handler.postDelayed(updateScreen, 1000/desiredFrameRate);
+		handler.postDelayed(addDandelion, 5000);
 	}
 	
 	private Runnable updateScreen = new Runnable() {
-        public void run() {
-        	long currentTime = System.currentTimeMillis();
-        	long secondsPassed = currentTime - lastTime; 
-        	lastTime = currentTime;
-        	surface.invalidate();
-            handler.postDelayed(updateScreen, 1000/desiredFrameRate);
-        }
-     };
-
+		public void run() {
+			surface.invalidate();
+			handler.postDelayed(updateScreen, 1000/desiredFrameRate);
+			surface.update(dandelions);
+		}
+	};
+	
+	private Runnable addDandelion = new Runnable() {
+		public void run() {
+			if (dandelions.size() > 10) {
+				Log.v(TAG, "Too many dandelions => creating no new ones");
+			} else {
+				Dandelion d = new Dandelion(handler);
+				d.setX((int) (Math.random() * (surface.getWidth() - d.getBitmap().getWidth())));
+				d.setY((int) (Math.random() * (surface.getHeight() - d.getBitmap().getHeight())));
+			
+				dandelions.add(d);
+			}
+			handler.postDelayed(addDandelion, 5000);
+		}
+	};
+     
 	@Override
 	public void onMove(int x, int y) {
-		dandelions.add(new Dandelion(x, y));
-		surface.update(dandelions);
 	}
 	
 	@Override
@@ -80,11 +92,11 @@ public class GameActivity extends Activity implements GrassSurface.OnTouchListen
 		for (Dandelion d : dandelions) {
 			Rect r = d.getRect();
 			if (r.contains(x, y)) {
+				handler.removeCallbacks(d);
 				dandelions.remove(d);
 				break;
 			}
 		}
-		surface.update(dandelions);
 	}
 	
 	@Override

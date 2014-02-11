@@ -9,12 +9,12 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 
-public class GameActivity extends Activity implements GrassSurface.OnTouchListener, Dandelion.StateListener {
+public class GameActivity extends Activity implements GrassSurface.OnTouchListener, Dandelion.AnimationListener {
 	
 	private final String TAG = "GameActivity";
 		
 	private final int desiredFrameRate = 60;
-	private int maxSpawningTime = 5000;
+	private int maxSpawningTime = 2000;
 	
 	private Handler handler = new Handler();
 
@@ -30,7 +30,7 @@ public class GameActivity extends Activity implements GrassSurface.OnTouchListen
 		Log.i(TAG, "onCreate()");
 		
 		surface = (GrassSurface) findViewById(R.id.screen);
-		Dandelions.setBitmap(this);
+		Dandelions.loadBitmaps(this);
 	}
 
 	@Override
@@ -56,6 +56,7 @@ public class GameActivity extends Activity implements GrassSurface.OnTouchListen
 	private Runnable updateScreen = new Runnable() {
 		public void run() {
 			surface.invalidate();
+			surface.update(dandelions);
 			handler.postDelayed(updateScreen, 1000/desiredFrameRate);
 		}
 	};
@@ -64,13 +65,15 @@ public class GameActivity extends Activity implements GrassSurface.OnTouchListen
 		public void run() {
 			if (dandelions.size() > 10) {
 				Log.d(TAG, "Too many dandelions => creating no new ones");
+				handler.removeCallbacks(updateScreen);
+				handler.removeCallbacks(addDandelion);
 			} else {
 				spawnDandelion();
-				surface.update(dandelions);
+				handler.postDelayed(addDandelion, (int) (Math.random() * maxSpawningTime));
 			}
-			handler.postDelayed(addDandelion, (int) (Math.random() * maxSpawningTime));
 		}
 	};
+
 	
 	private void spawnDandelion() {
 		Dandelion d = new Dandelion(this);
@@ -122,17 +125,15 @@ public class GameActivity extends Activity implements GrassSurface.OnTouchListen
 	}
 
 	@Override
-	public void onStateChanged(Dandelion d, int state) {
-		if (state == Dandelion.STATE_EXPLODE) {
-			Log.v(TAG, "dandelion \"exploded\"");
-			for (Dandelion e : dandelions) {
-				if (e == d) {
-					d.removeCallbacks();
-					dandelions.remove(e);
-					break;
-				}
-			}
-		}
-		surface.update(dandelions);
+	public void onAnimationEnded(Dandelion d) {
+		surface.updateBackground(d);
+		d.removeCallbacks();
+		dandelions.remove(d);
+	}
+	
+	@Override
+	public void onSpawnSeeds() {
+		Log.v(TAG, "dandelion started spawning seeds => change spawning time dandelion");
+		maxSpawningTime = (int) (maxSpawningTime * 0.9);
 	}
 }

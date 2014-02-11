@@ -5,30 +5,19 @@ import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Handler;
-import android.util.Log;
 
 public class Dandelion implements Runnable {
 	
-	public interface StateListener {
-		public void onStateChanged(Dandelion d, int state);
+	public interface AnimationListener {
+		public void onAnimationEnded(Dandelion d);
+		public void onSpawnSeeds();
 	}
 	
-	private static final String TAG = "Dandelion";
-	
-	public static final int STATE_GROW = 0;
-	public static final int STATE_FLOWER = 1;
-	public static final int STATE_BLOW = 2;
-	public static final int STATE_EXPLODE = 3;
-	
-	private final int GROWING_TIME = 2500;
-	private final int BLOSSOMING_TIME = 2000;
-	private final int ENDING_TIME = 2000;
-	
-	private int state;
 	private Point pos = new Point();
-	private Handler handler = new Handler(); //make new handler???
+	private Handler handler = new Handler();
+	private int frame = 0;
 	
-	private StateListener listener;
+	private AnimationListener listener;
 	private Context context;
 	
 	public Dandelion(Context c) {
@@ -42,24 +31,14 @@ public class Dandelion implements Runnable {
 	private void init(Context c, int x, int y) {
 		setX(x);
 		setY(y);
-		state = STATE_GROW;
 		context = c;
 		try {
-            listener = (StateListener) context;
+            listener = (AnimationListener) context;
         } catch (ClassCastException e) {
             throw new ClassCastException(context.toString()
-                    + " must implement StateListener");
+                    + " must implement AnimationListener");
         }
-		handler.postDelayed(this, GROWING_TIME);
-	}
-	
-	public Point getPosition() {
-		return pos;
-	}
-
-	public void setPosition(Point p) {
-		setX(p.x);
-		setY(p.y);
+		handler.postDelayed(this, Dandelions.STAGE_LENGTH);
 	}
 	
 	public int getX() {
@@ -78,22 +57,18 @@ public class Dandelion implements Runnable {
 		pos.y = y;
 	}
 	
-	public int getState() {
-		return state;
-	}
-	
-	public void setState(int s) {
-		state = s;
-	}
-	
 	public Bitmap getBitmap() {
-		return Dandelions.getBitmap(state);
+		return Dandelions.getFrame(frame);
 	}
 	
 	public Rect getRect() {
-		int w = Dandelions.getBitmap(state).getWidth();
-		int h = Dandelions.getBitmap(state).getHeight();
+		int w = Dandelions.getFrame(frame).getWidth();
+		int h = Dandelions.getFrame(frame).getHeight();
 		return new Rect(pos.x, pos.y, pos.x + w, pos.y + h);
+	}
+	
+	public int getFrame() {
+		return frame;
 	}
 	
 	public void removeCallbacks() {
@@ -102,23 +77,15 @@ public class Dandelion implements Runnable {
 
 	@Override
 	public void run() {
-		Log.v(TAG, "run");
-		switch (state) {
-		case STATE_GROW:
-			state = STATE_FLOWER;
-			handler.postDelayed(this, BLOSSOMING_TIME);
-			break;
-		case STATE_FLOWER:
-			state = STATE_BLOW;
-			handler.postDelayed(this, ENDING_TIME);
-			break;
-		case STATE_BLOW:
-			state = STATE_EXPLODE;
-			break;
-		default:
-			handler.removeCallbacks(this);
-			break;
+		if (frame == (Dandelions.ANIMATION_LENGTH - 1)) {
+			listener.onAnimationEnded(this);
+			removeCallbacks();
+		} else {
+			frame++;
+			if (frame == Dandelions.FRAME_START_BLOWING) {
+				listener.onSpawnSeeds();
+			}
+			handler.postDelayed(this, Dandelions.STAGE_LENGTH);
 		}
-		listener.onStateChanged(this, state);
 	}
 }

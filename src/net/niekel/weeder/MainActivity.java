@@ -17,42 +17,6 @@ public class MainActivity extends Activity {
 		setContentView(R.layout.activity_main);
 		Log.i(TAG, "onCreate()");
 	}
-	
-	@Override
-	public void onStart() {
-		super.onStart();
-		Log.i(TAG, "onStart()");
-	}
-	
-	@Override
-	public void onRestart() {
-		super.onRestart();
-		Log.i(TAG, "onRestart()");
-	}
-	
-	@Override
-	public void onResume() {
-		super.onResume();
-		Log.i(TAG, "onResume()");
-	}
-	
-	@Override
-	public void onPause() {
-		super.onPause();
-		Log.i(TAG, "onPause()");
-	}
-	
-	@Override
-	public void onStop() {
-		super.onStop();
-		Log.i(TAG, "onStop()");
-	}
-	
-	@Override
-	public void onDestroy() {
-		super.onDestroy();
-		Log.i(TAG, "onDestroy()");
-	}
 
 	public void onClick(View v) {
 		int id = v.getId();

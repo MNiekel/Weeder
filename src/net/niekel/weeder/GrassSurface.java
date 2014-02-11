@@ -18,7 +18,6 @@ public class GrassSurface extends View {
 	
 	public interface OnTouchListener {
 		public void onTouch(int x, int y);
-		public void onMove(int x, int y);
     }
 	
 	private final String TAG = "GrassSurface";
@@ -87,9 +86,6 @@ public class GrassSurface extends View {
 		//Log.d(TAG, "onTouchEvent: " +x+":"+y);
 		int action = event.getAction();
 		switch (action) {
-			case MotionEvent.ACTION_MOVE:
-				listener.onMove(x, y);
-				break;
 			case MotionEvent.ACTION_DOWN:
 				listener.onTouch(x, y);
 				break;

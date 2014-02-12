@@ -2,6 +2,7 @@ package net.niekel.weeder;
 
 import android.os.Bundle;
 import android.app.Activity;
+import android.app.DialogFragment;
 import android.content.Intent;
 import android.util.Log;
 import android.view.View;
@@ -27,9 +28,13 @@ public class MainActivity extends Activity {
 			Log.i(TAG, "Play button clicked");
 			intent = new Intent(this, GameActivity.class);
 			startActivity(intent);
+			finish();
 			break;
 		case R.id.button_help:
 			Log.i(TAG, "Help button clicked");
+			DialogFragment end = new Help();
+			end.setCancelable(true);
+			end.show(getFragmentManager(), "Help");
 			break;
 		default:
 			Log.e(TAG, "Unknown button clicked");

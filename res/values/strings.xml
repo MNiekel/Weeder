@@ -2,11 +2,21 @@
 <resources>
 
     <string name="app_name">Weeder</string>
-    <string name="action_settings">Settings</string>
-    <string name="hello_world">Hello world!</string>
-    <string name="title_activity_test">TestActivity</string>
-    <string name="title_activity_fullscreen">FullscreenActivity</string>
-    <string name="dummy_button">Dummy Button</string>
-    <string name="dummy_content">DUMMY\nCONTENT</string>
+    <string name="message_gameover_1">"Too many dandelions covered your field. You managed to keep it clean for "</string>
+    <string name="message_gameover_2">" seconds. "</string>
+    <string name="message_gameover_3">\nWant to try again?</string>
+    <string name="message_gameover_4">That is a new hiscore! </string>
+    <string name="message_gameover_5">"The hiscore is "</string>
+    <string name="message_quit">Do you really want quit?</string>
+    <string name="try_again">Try again</string>
+    <string name="quit">Quit</string>
+    <string name="ok">OK</string>
+    <string name="help">
+        You are Mr. Joe Weeder, the proud owner of the most beautiful grass field in all of the district. Unfortunately, dandelions
+        keep popping up out of nowhere. Your job: remove these pesky flowers before they cover your entire field. But you have to work
+        quickly. If you don\'t get them
+        before they start spreading their seeds, even more dandelions will appear. It is a lost race, but how long can you keep your field
+        clean?\n\nGame and visual art created by Softnez\nMusic from http://www.uniquetracks.com
+    </string>
 
 </resources>

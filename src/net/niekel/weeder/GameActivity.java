@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Random;
 
 import android.app.Activity;
+import android.app.DialogFragment;
+import android.content.SharedPreferences;
 import android.graphics.Rect;
 import android.media.MediaPlayer;
 import android.os.Bundle;
@@ -14,59 +16,76 @@ import android.util.Log;
 public class GameActivity extends Activity implements GrassSurface.OnTouchListener, Dandelion.AnimationListener {
 	
 	private final String TAG = "GameActivity";
+	
+	public final String KEY_SCORE = "score";
+	public final String KEY_FINISHED = "finished";
+	public final String KEY_HISCORE = "hiscore";
 		
 	private final int desiredFrameRate = 60;
 	private final int maxDandelions = 10;
-	
+	private final int maxSpawningTime = 1200;
+	private final float fraction = 0.85f;
 	
 	private Handler handler = new Handler();
-	private int maxSpawningTime = 1024;
 	private Random random = new Random();
 	
 	private GrassSurface surface;
 	private List<Dandelion> dandelions = new ArrayList<Dandelion>();
 	private MediaPlayer music;
 	
+	private long start;
+	private long score;
+	private int spawningTime;
+	private SharedPreferences prefs;
+	private long hiscore;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		
 		setContentView(R.layout.activity_game);
-		
-		Log.i(TAG, "onCreate()");
-		
+				
 		surface = (GrassSurface) findViewById(R.id.screen);
 		Dandelions.loadBitmaps(this);
+		prefs = getPreferences(MODE_PRIVATE);
+		hiscore = prefs.getLong(KEY_HISCORE, 0);
 	}
 
 	@Override
 	public void onPause() {
 		super.onPause();
-		Log.i(TAG, "onPause()");
-		music.stop();
-		music.release();
-		handler.removeCallbacks(updateScreen);
-		handler.removeCallbacks(addDandelion);
-		for (Dandelion d : dandelions) {
-			d.removeCallbacks();
-		}
-		dandelions.clear();
+		stopMusic();
+		stop();
 	}
 	
 	@Override
 	public void onResume() {
 		super.onResume();
-		Log.i(TAG, "onResume()");
-		music = MediaPlayer.create(this, R.raw.music);
-		music.setLooping(true);
-		music.start();
-		handler.postDelayed(updateScreen, 1000/desiredFrameRate);
-		handler.postDelayed(addDandelion, maxSpawningTime);
+		startMusic();
+		start();
+	}
+
+	@Override
+	public void onBackPressed() {
+		music.pause();
+		stop();
+		buildDialog("Quit?", false);
+	}
+
+	private void buildDialog(String tag, boolean finished) {
+		DialogFragment end = new Alert();
+		Bundle args = new Bundle();
+		args.putBoolean(KEY_FINISHED, finished);
+		args.putInt(KEY_SCORE, (int) score);
+		args.putInt(KEY_HISCORE, (int) hiscore);
+		end.setArguments(args);
+		end.setCancelable(false);
+		end.show(getFragmentManager(), tag);
 	}
 	
 	private Runnable updateScreen = new Runnable() {
 		public void run() {
-			surface.update(dandelions);
+			surface.update(dandelions, getSeconds());
 			surface.invalidate();
 			handler.postDelayed(updateScreen, 1000/desiredFrameRate);
 		}
@@ -76,15 +95,10 @@ public class GameActivity extends Activity implements GrassSurface.OnTouchListen
 		public void run() {
 			if (dandelions.size() > maxDandelions) {
 				Log.i(TAG, "too many dandelions => end game");
-				handler.removeCallbacks(updateScreen);
-				handler.removeCallbacks(addDandelion);
-				for (Dandelion d : dandelions) {
-					d.removeCallbacks();
-				}
-				dandelions.clear();
+				endGame();
 			} else {
 				spawnDandelion();
-				handler.postDelayed(addDandelion, random.nextInt(maxSpawningTime));
+				handler.postDelayed(addDandelion, random.nextInt(spawningTime));
 			}
 		}
 	};
@@ -95,6 +109,57 @@ public class GameActivity extends Activity implements GrassSurface.OnTouchListen
 		d.setY(random.nextInt(surface.getHeight() - d.getBitmap().getHeight()));
 	
 		dandelions.add(d);
+	}
+	
+	private void stopMusic() {
+		music.stop();
+		music.release();
+	}
+	
+	private void stop() {
+		handler.removeCallbacks(updateScreen);
+		handler.removeCallbacks(addDandelion);
+		for (Dandelion d : dandelions) {
+			d.removeCallbacks();
+		}
+		dandelions.clear();
+	}
+	
+	private void startMusic() {
+		music = MediaPlayer.create(this, R.raw.music);
+		music.setLooping(true);
+		music.start();
+	}
+
+	private void start() {
+		start = System.currentTimeMillis();
+		score = 0;
+		spawningTime = maxSpawningTime;
+		handler.post(updateScreen);
+		handler.postDelayed(addDandelion, 2000);
+	}
+	
+	private void endGame() {
+		score = getSeconds();
+		if (score >= hiscore) {
+			hiscore = score;
+			prefs.edit().putLong(KEY_HISCORE, hiscore).commit();
+		}
+				
+		stop();
+		music.pause();
+		
+		buildDialog("Game Over", true);
+	}
+	
+	public void restartGame() {
+		music.seekTo(0);
+		music.start();
+		start();
+	}
+	
+	private long getSeconds() {
+		return (System.currentTimeMillis() - start) / 1000;
 	}
 
 	@Override
@@ -111,15 +176,12 @@ public class GameActivity extends Activity implements GrassSurface.OnTouchListen
 	
 	@Override
 	public void onAnimationEnded(Dandelion d) {
-		Log.i(TAG, "dandelion overblown => stick last frame on background and remove from list");
-		surface.updateBackground(d);
-		d.removeCallbacks();
-		dandelions.remove(d);
+		Log.i(TAG, "dandelion overblown");
 	}
 	
 	@Override
 	public void onSpawnSeeds() {
 		Log.i(TAG, "dandelion started spreading seeds => decrease spawning time");
-		maxSpawningTime = (int) (maxSpawningTime * 0.9);
+		spawningTime = (int) (spawningTime * fraction);
 	}
 }

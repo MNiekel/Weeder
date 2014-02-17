@@ -14,12 +14,11 @@ MainActivity activity;
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         activity = (MainActivity) getActivity();
         
-        builder.setTitle(getTag());
         builder.setMessage(R.string.help);
         
         builder.setNeutralButton(R.string.ok, new DialogInterface.OnClickListener() {
                    public void onClick(DialogInterface dialog, int id) {
-                       // TODO
+                       // Dismiss
                    }
                });
         return builder.create();

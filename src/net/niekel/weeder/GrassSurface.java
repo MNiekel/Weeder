@@ -28,7 +28,9 @@ public class GrassSurface extends View {
 	private Paint paint;
 	private OnTouchListener listener;
 	
-	private long passed;
+	private long now;
+	private long last;
+	private long start;
 
 
 	public GrassSurface(Context context) {
@@ -49,6 +51,7 @@ public class GrassSurface extends View {
 	private void init(Context context) {
 		paint = new Paint();
 		paint.setTextSize(TEXT_SIZE);
+		last = start;
 		
 		try {
             listener = (OnTouchListener) context;
@@ -59,6 +62,11 @@ public class GrassSurface extends View {
 		invalidate();
 	}
 	
+	public void resetTime(long time) {
+		start = time;
+		last = start;
+	}
+	
 	@Override
 	protected void onDraw(Canvas canvas) {
 		super.onDraw(canvas);
@@ -66,10 +74,16 @@ public class GrassSurface extends View {
 			Log.i(TAG, "Init of drawing area");
 			drawing_bitmap = Bitmap.createBitmap(canvas.getWidth(), canvas.getHeight(), Config.ARGB_8888);
 			drawing_canvas.setBitmap(drawing_bitmap);
-		}
-		canvas.drawBitmap(drawing_bitmap, 0,  0, null);
+		} else {
+			canvas.drawBitmap(drawing_bitmap, 0,  0, null);
 		
-		canvas.drawText("Seconds alive: " + passed, 0, TEXT_SIZE, paint);
+			long passed = (now - start) / 1000;
+			long framerate = 1000 / (now - last);
+			last = now;
+		
+			canvas.drawText("Seconds alive: " +passed, 0, TEXT_SIZE, paint);
+			Log.d(TAG, "FPS: " +framerate);
+		}
 	}
 
 	@Override
@@ -91,7 +105,7 @@ public class GrassSurface extends View {
 		if (drawing_bitmap == null) {
 			return;
 		}
-		passed = seconds;
+		now = seconds;
 		drawing_bitmap.eraseColor(Color.TRANSPARENT);
 		for (Dandelion d : dandelions) {
 			drawing_canvas.drawBitmap(d.getBitmap(), d.getX(), d.getY(), paint);

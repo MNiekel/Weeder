@@ -21,7 +21,7 @@ public class GameActivity extends Activity implements GrassSurface.OnTouchListen
 	public final String KEY_FINISHED = "finished";
 	public final String KEY_HISCORE = "hiscore";
 		
-	private final int desiredFrameRate = 60;
+	private final int desiredFrameRate = 30;
 	private final int maxDandelions = 10;
 	private final int maxSpawningTime = 1200;
 	private final float fraction = 0.85f;
@@ -85,7 +85,7 @@ public class GameActivity extends Activity implements GrassSurface.OnTouchListen
 	
 	private Runnable updateScreen = new Runnable() {
 		public void run() {
-			surface.update(dandelions, getSeconds());
+			surface.update(dandelions, System.currentTimeMillis());
 			surface.invalidate();
 			handler.postDelayed(updateScreen, 1000/desiredFrameRate);
 		}
@@ -133,6 +133,7 @@ public class GameActivity extends Activity implements GrassSurface.OnTouchListen
 
 	private void start() {
 		start = System.currentTimeMillis();
+		surface.resetTime(start);
 		score = 0;
 		spawningTime = maxSpawningTime;
 		handler.post(updateScreen);

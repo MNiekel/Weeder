@@ -3,13 +3,11 @@ package net.niekel.weeder;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.andengine.engine.camera.Camera;
 import org.andengine.entity.scene.IOnSceneTouchListener;
 import org.andengine.entity.scene.Scene;
 import org.andengine.entity.sprite.AnimatedSprite;
 import org.andengine.entity.sprite.AnimatedSprite.IAnimationListener;
 import org.andengine.input.touch.TouchEvent;
-
 import android.graphics.Rect;
 import android.util.Log;
 
@@ -19,9 +17,11 @@ public class GameScene extends Scene implements IAnimationListener, IOnSceneTouc
 	public static final String TAG = "GameScene";
 	
 	public static float mSpawningFraction;
-	private GameUpdateHandler updateHandler;
-	
-	private List<DandelionSprite> dandelions;
+	private long startTime;
+	public long totalTime;
+	public int score;
+		
+	private List<DandelionSprite> dandelions = new ArrayList<DandelionSprite>();
 
 	public GameScene() {
 		Log.d(TAG, "Create GameScene ");
@@ -29,12 +29,8 @@ public class GameScene extends Scene implements IAnimationListener, IOnSceneTouc
 		setBackground(ResourceManager.getSharedInstance().backgroundSprite);
 	    
 	    setOnSceneTouchListener(this);
-	    
-	    mSpawningFraction = 1f;
-	    dandelions = new ArrayList<DandelionSprite>();
-	    
-	    updateHandler = new GameUpdateHandler();
-	    registerUpdateHandler(updateHandler);
+	    	    
+	    resetValues();
 	}
 	
 	public void spawnDandelion() {
@@ -52,12 +48,12 @@ public class GameScene extends Scene implements IAnimationListener, IOnSceneTouc
 	}
 	
 	private void gameOver() {
-		SimpleActivity.getSharedInstance().setCurrentScene(new MainMenuScene(SimpleActivity.getSharedInstance().mCamera));
-		detach();
+		totalTime = (System.currentTimeMillis() - startTime) / 1000;
+		setChildScene((Scene) (new GameOverScene(SimpleActivity.getSharedInstance().mCamera, this)));
+		clearUpdateHandlers();
 	}
 	
 	public void detach() {
-	    Log.v(TAG, "GameScene onDetached()");
 	    clearUpdateHandlers();
 	    for (DandelionSprite d : dandelions) {
 	        DandelionPool.getSharedInstance().recyclePoolItem(d);
@@ -65,12 +61,25 @@ public class GameScene extends Scene implements IAnimationListener, IOnSceneTouc
 	    dandelions.clear();
 	    detachChildren();
 	}
+	
+	public void resetValues() {
+		clearChildScene();
+		for (DandelionSprite d : dandelions) {
+	        DandelionPool.getSharedInstance().recyclePoolItem(d);
+	    }
+	    dandelions.clear();
+	    mSpawningFraction = 1f;
+	    startTime = System.currentTimeMillis();
+	    totalTime = 0;
+	    score = 0;
+	    registerUpdateHandler(new GameUpdateHandler());
+	}
 
 	@Override
 	public void onAnimationFrameChanged(AnimatedSprite pAnimatedSprite, int pOldFrameIndex, int pNewFrameIndex) {
 		if (pNewFrameIndex == 5) {
-			Log.d(TAG, "Started spreading seeds");
-			mSpawningFraction *= 0.9;
+			Log.i(TAG, "Started spreading seeds");
+			mSpawningFraction *= 0.85;
 		}
 	}	
 
@@ -83,6 +92,7 @@ public class GameScene extends Scene implements IAnimationListener, IOnSceneTouc
 					if (r.contains((int) pSceneTouchEvent.getX(), (int) pSceneTouchEvent.getY())) {
 						dandelions.remove(d);
 						DandelionPool.getSharedInstance().recyclePoolItem(d);
+						score++;
 						break;
 					}
 				}

@@ -5,26 +5,16 @@ import org.andengine.engine.options.EngineOptions;
 import org.andengine.engine.options.ScreenOrientation;
 import org.andengine.engine.options.resolutionpolicy.RatioResolutionPolicy;
 import org.andengine.entity.scene.Scene;
-import org.andengine.entity.scene.background.Background;
-import org.andengine.entity.scene.background.SpriteBackground;
-import org.andengine.entity.sprite.Sprite;
 import org.andengine.entity.util.FPSLogger;
-import org.andengine.opengl.font.Font;
-import org.andengine.opengl.font.FontFactory;
-import org.andengine.opengl.texture.TextureOptions;
-import org.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlas;
-import org.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlasTextureRegionFactory;
-import org.andengine.opengl.texture.region.ITextureRegion;
 import org.andengine.ui.activity.SimpleBaseGameActivity;
 
-import android.graphics.Typeface;
 import android.util.DisplayMetrics;
 import android.util.Log;
 
 public class SimpleActivity extends SimpleBaseGameActivity {
 	
-	static int CAMERA_WIDTH;
-	static int CAMERA_HEIGHT;
+	static int CAMERA_WIDTH = 800;
+	static int CAMERA_HEIGHT = 600;
 	 
 	public Camera mCamera;
 	public Scene mCurrentScene;
@@ -36,11 +26,11 @@ public class SimpleActivity extends SimpleBaseGameActivity {
 		instance = this;
 		final DisplayMetrics metrics = new DisplayMetrics();
 	    getWindowManager().getDefaultDisplay().getMetrics(metrics);
-	    CAMERA_WIDTH = metrics.widthPixels;
-	    CAMERA_HEIGHT = metrics.heightPixels;
+	    int screenWidth = metrics.widthPixels;
+	    int screenHeight = metrics.heightPixels;
+	    CAMERA_HEIGHT = (int) (screenHeight * ((float) CAMERA_WIDTH / (float) screenWidth));
 		mCamera = new Camera(0, 0, CAMERA_WIDTH, CAMERA_HEIGHT);
 		EngineOptions engineOptions = new EngineOptions(true, ScreenOrientation.LANDSCAPE_FIXED, new RatioResolutionPolicy(CAMERA_WIDTH, CAMERA_HEIGHT), mCamera);
-	 
 	    return engineOptions;
 	}
 
@@ -79,14 +69,6 @@ public class SimpleActivity extends SimpleBaseGameActivity {
 	
 	@Override
 	public void onBackPressed() {
-	    if (mCurrentScene instanceof GameScene)
-	    {
-	        ((GameScene) mCurrentScene).detach();
-	    	DandelionPool.instance = null;
-	        setCurrentScene(new MainMenuScene(mCamera));
-	    } else {
-	    	mCurrentScene = null;
-	    	super.onBackPressed();
-	    }
+		finish();
 	}
 }

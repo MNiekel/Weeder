@@ -3,12 +3,12 @@
 
     <string name="app_name">Weeder</string>
     <string name="message_gameover_1">"Too many dandelions covered your field. You managed to keep it clean for "</string>
-    <string name="message_gameover_2">" seconds. "</string>
-    <string name="message_gameover_3">\nWant to try again?</string>
-    <string name="message_gameover_4">That is a new hiscore! </string>
-    <string name="message_gameover_5">"The hiscore is "</string>
-    <string name="message_quit">Do you really want quit?</string>
+    <string name="message_gameover_2">" seconds. You removed "</string>
+    <string name="message_gameover_3">" dandelions in that time."</string>
+    <string name="message_gameover_4">" Touch screen to start again."</string>
+    <string name="message_gameover_5">" Want to try again?"</string>
     <string name="try_again">Try again</string>
+    <string name="message_quit">Do you really want to quit?</string>
     <string name="quit">Quit</string>
     <string name="ok">OK</string>
     <string name="help">

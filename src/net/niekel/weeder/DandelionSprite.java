@@ -8,7 +8,6 @@ import android.graphics.Rect;
 
 public class DandelionSprite extends AnimatedSprite {
 	
-	private static final String TAG = "DandelionSprite";
 	private static final int ANIMATION_TIME = 350;
 	
 	private Random mRandom = new Random();

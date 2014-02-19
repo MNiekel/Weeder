@@ -8,7 +8,7 @@ public class GameUpdateHandler implements IUpdateHandler {
 	
 	public static final String TAG = "GameUpdateHandler";
 	private final float MAX_SPAWN_INTERVAL = 2f;
-	private final float MIN_SPAWN_INTERVAL = 0.5f;
+	private final float MIN_SPAWN_INTERVAL = 0.3f;
 		
 	private float mTime = 0;
 	private float mInterval;
